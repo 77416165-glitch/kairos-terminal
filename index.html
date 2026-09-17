@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAIROS | Market Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://www.paypal.com/sdk/js?client-id=BAAMc7QRslo4vGuG9Irch-b0u988VJ1c5x7D-bQljw7VMguN_ZyMTU2mZz87HmDvO_XFkskR4oz9OewFZY&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
+  <style>
+    body { background-color: #0b0e11; color: #e0e6ed; font-family: system-ui, -apple-system, sans-serif; }
+    .border-dark { border-color: #1e2329; }
+    .bg-panel { background-color: #161a1e; }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden relative">
+
+  <header class="h-14 bg-panel border-b border-dark px-4 flex items-center justify-between z-10">
+    <div class="flex items-center space-x-3">
+      <div class="text-xl font-bold tracking-wider text-cyan-400 flex items-center gap-2">
+        <i class="fa-solid fa-bolt"></i>KAIROS
+      </div>
+      <span class="text-xs bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-0.5 rounded font-mono">DEMO TERMINAL</span>
+    </div>
+
+    <div class="flex-1 max-w-xs mx-4 hidden lg:block">
+      <div class="relative flex gap-1">
+        <input id="tokenInput" type="text" placeholder="BINANCE:SOLUSDT" class="w-full bg-slate-900 border border-dark rounded px-3 py-1 text-sm text-gray-200 focus:outline-none focus:border-cyan-500">
+        <button onclick="updateChart()" class="bg-cyan-700 hover:bg-cyan-600 text-xs px-3 py-1 rounded font-bold">CARGAR</button>
+      </div>
+    </div>
+
+    <div id="paypal-container-top" class="max-w-[160px]"></div>
+  </header>
+
+  <div id="limitBanner" class="bg-slate-900 border-b border-cyan-500/30 px-4 py-2 text-xs flex justify-between items-center text-cyan-200 z-20">
+    <div class="flex items-center gap-2">
+      <i class="fa-solid fa-circle-info text-cyan-400"></i>
+      <span>Plataforma demostrativa de análisis de mercado en tiempo real.</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="font-mono bg-black/40 px-2 py-0.5 rounded text-white" id="timer">05:00</span>
+      <button onclick="document.getElementById('limitBanner').style.display='none'" class="text-gray-400 hover:text-white font-bold ml-2">✕</button>
+    </div>
+  </div>
+
+  <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+    <div class="flex-1 flex flex-col border-r border-dark bg-panel">
+      <div class="p-2 border-b border-dark flex gap-4 text-xs font-mono text-gray-400">
+        <button onclick="setPair('BINANCE:SOLUSDT')" class="text-cyan-400 font-bold hover:underline">SOL / USDT</button>
+        <button onclick="setPair('BINANCE:BTCUSDT')" class="hover:underline">BTC / USDT</button>
+        <button onclick="setPair('BINANCE:ETHUSDT')" class="hover:underline">ETH / USDT</button>
+      </div>
+      <div class="flex-1 w-full h-full bg-black">
+        <iframe id="tv_iframe" src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ASOLUSDT&interval=D&theme=dark&style=1" class="w-full h-full border-0"></iframe>
+      </div>
+    </div>
+
+    <div class="w-full md:w-80 bg-panel flex flex-col border-l border-dark p-4 justify-between overflow-y-auto">
+      <div class="space-y-4">
+        <h3 class="text-sm font-bold text-gray-200 uppercase tracking-wider">Métricas del Par</h3>
+        
+        <div class="p-3 bg-gray-900 rounded border border-dark text-xs space-y-3">
+          <div class="flex justify-between font-mono">
+            <span class="text-gray-400">Par activo:</span>
+            <span id="currentPairText" class="text-cyan-400 font-bold">SOL / USDT</span>
+          </div>
+          <div class="flex justify-between font-mono">
+            <span class="text-gray-400">Estado de red:</span>
+            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-signal text-[10px]"></i> En Línea</span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-slate-900/60 rounded border border-dark text-[11px] space-y-2">
+          <h4 class="font-bold text-gray-300">Suscripción de acceso:</h4>
+          <p class="text-gray-400">Accede a herramientas avanzadas y soporte analítico.</p>
+          <div id="paypal-container-side" class="mt-2"></div>
+        </div>
+      </div>
+
+      <!-- Términos Legales -->
+      <div class="pt-4 border-t border-dark text-[10px] text-gray-500 space-y-2">
+        <p class="font-bold text-gray-400">AVISO LEGAL Y EXENCIÓN DE RESPONSABILIDAD</p>
+        <p>KAIROS es un simulador e interfaz de visualización informativa. No presta servicios financieros ni ejecuta transacciones en mercados reales. Los pagos realizados mediante PayPal se consideran pagos por servicios educativos y de visualización.</p>
+        <span class="block text-center font-mono pt-1 text-gray-600">KAIROS Visualizer v2.4</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setPair(symbol) {
+      document.getElementById('tv_iframe').src = `https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(symbol)}&interval=D&theme=dark&style=1`;
+      document.getElementById('currentPairText').innerText = symbol.replace('BINANCE:', '').replace('USDT', ' / USDT');
+    }
+    function updateChart() {
+      const val = document.getElementById('tokenInput').value.trim();
+      if (val) setPair(val);
+    }
+
+    // Inicializar botones de PayPal
+    window.addEventListener('load', () => {
+      if (window.paypal && paypal.HostedButtons) {
+        paypal.HostedButtons({ hostedButtonId: "BAAMc7QRslo4vGuG9Irch" }).render("#paypal-container-top");
+        paypal.HostedButtons({ hostedButtonId: "BAAMc7QRslo4vGuG9Irch" }).render("#paypal-container-side");
+      }
+    });
+  </script>
+</body>
+</html>
