@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KAIROS | Market Terminal</title>
+  <title>KAIROS | Trading Terminal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://www.paypal.com/sdk/js?client-id=BAAMc7QRslo4vGuG9Irch-b0u988VJ1c5x7D-bQljw7VMguN_ZyMTU2mZz87HmDvO_XFkskR4oz9OewFZY&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
+  <!-- SDK estándar de PayPal (remplazado para asegurar que pinte los botones) -->
+  <script src="https://www.paypal.com/sdk/js?client-id=BAAMc7QRslo4vGuG9Irch-b0u988VJ1c5x7D-bQljw7VMguN_ZyMTU2mZz87HmDvO_XFkskR4oz9OewFZY&currency=USD"></script>
   <style>
     body { background-color: #0b0e11; color: #e0e6ed; font-family: system-ui, -apple-system, sans-serif; }
     .border-dark { border-color: #1e2329; }
@@ -15,12 +16,12 @@
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative">
 
+  <!-- Encabezado Principal -->
   <header class="h-14 bg-panel border-b border-dark px-4 flex items-center justify-between z-10">
     <div class="flex items-center space-x-3">
       <div class="text-xl font-bold tracking-wider text-cyan-400 flex items-center gap-2">
-        <i class="fa-solid fa-bolt"></i>KAIROS
+        <i class="fa-solid fa-bolt"></i>KAIROS TERMINAL
       </div>
-      <span class="text-xs bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-0.5 rounded font-mono">DEMO TERMINAL</span>
     </div>
 
     <div class="flex-1 max-w-xs mx-4 hidden lg:block">
@@ -30,21 +31,16 @@
       </div>
     </div>
 
-    <div id="paypal-container-top" class="max-w-[160px]"></div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-gray-400 font-mono">SALDO:</span>
+      <span id="userBalance" class="text-sm font-bold text-emerald-400 font-mono">$100.00 USD</span>
+    </div>
   </header>
 
-  <div id="limitBanner" class="bg-slate-900 border-b border-cyan-500/30 px-4 py-2 text-xs flex justify-between items-center text-cyan-200 z-20">
-    <div class="flex items-center gap-2">
-      <i class="fa-solid fa-circle-info text-cyan-400"></i>
-      <span>Plataforma demostrativa de análisis de mercado en tiempo real.</span>
-    </div>
-    <div class="flex items-center gap-3">
-      <span class="font-mono bg-black/40 px-2 py-0.5 rounded text-white" id="timer">05:00</span>
-      <button onclick="document.getElementById('limitBanner').style.display='none'" class="text-gray-400 hover:text-white font-bold ml-2">✕</button>
-    </div>
-  </div>
-
+  <!-- Cuerpo de la aplicación -->
   <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+    
+    <!-- Gráfico TradingView -->
     <div class="flex-1 flex flex-col border-r border-dark bg-panel">
       <div class="p-2 border-b border-dark flex gap-4 text-xs font-mono text-gray-400">
         <button onclick="setPair('BINANCE:SOLUSDT')" class="text-cyan-400 font-bold hover:underline">SOL / USDT</button>
@@ -56,52 +52,114 @@
       </div>
     </div>
 
-    <div class="w-full md:w-80 bg-panel flex flex-col border-l border-dark p-4 justify-between overflow-y-auto">
-      <div class="space-y-4">
-        <h3 class="text-sm font-bold text-gray-200 uppercase tracking-wider">Métricas del Par</h3>
+    <!-- Panel Lateral de Operaciones y Recarga -->
+    <div class="w-full md:w-80 bg-panel flex flex-col border-l border-dark p-4 justify-between overflow-y-auto space-y-4">
+      
+      <!-- Panel de Dinámica Trading -->
+      <div class="space-y-3">
+        <h3 class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-dark pb-2">Operación Rápida</h3>
         
-        <div class="p-3 bg-gray-900 rounded border border-dark text-xs space-y-3">
-          <div class="flex justify-between font-mono">
-            <span class="text-gray-400">Par activo:</span>
-            <span id="currentPairText" class="text-cyan-400 font-bold">SOL / USDT</span>
-          </div>
-          <div class="flex justify-between font-mono">
-            <span class="text-gray-400">Estado de red:</span>
-            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-signal text-[10px]"></i> En Línea</span>
-          </div>
+        <div>
+          <label class="text-[11px] text-gray-400 block mb-1">Monto de Operación ($)</label>
+          <input id="tradeAmount" type="number" value="10" min="1" class="w-full bg-slate-900 border border-dark rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono">
         </div>
 
-        <div class="p-3 bg-slate-900/60 rounded border border-dark text-[11px] space-y-2">
-          <h4 class="font-bold text-gray-300">Suscripción de acceso:</h4>
-          <p class="text-gray-400">Accede a herramientas avanzadas y soporte analítico.</p>
-          <div id="paypal-container-side" class="mt-2"></div>
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button onclick="executeTrade('CALL')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded text-xs flex items-center justify-center gap-1">
+            <i class="fa-solid fa-arrow-up"></i> SUBE (GREEN)
+          </button>
+          <button onclick="executeTrade('PUT')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 px-3 rounded text-xs flex items-center justify-center gap-1">
+            <i class="fa-solid fa-arrow-down"></i> BAJA (RED)
+          </button>
         </div>
+
+        <div id="tradeStatus" class="text-xs text-center font-mono py-1 min-h-[20px]"></div>
       </div>
 
-      <!-- Términos Legales -->
-      <div class="pt-4 border-t border-dark text-[10px] text-gray-500 space-y-2">
-        <p class="font-bold text-gray-400">AVISO LEGAL Y EXENCIÓN DE RESPONSABILIDAD</p>
-        <p>KAIROS es un simulador e interfaz de visualización informativa. No presta servicios financieros ni ejecuta transacciones en mercados reales. Los pagos realizados mediante PayPal se consideran pagos por servicios educativos y de visualización.</p>
-        <span class="block text-center font-mono pt-1 text-gray-600">KAIROS Visualizer v2.4</span>
+      <!-- Panel de Recarga de Saldo con PayPal -->
+      <div class="p-3 bg-slate-900 rounded border border-dark space-y-2">
+        <h4 class="text-xs font-bold text-cyan-400 uppercase">Recargar Saldo Real</h4>
+        <p class="text-[10px] text-gray-400">Añade fondos instantáneos a tu cuenta para operar.</p>
+        
+        <!-- Contenedor real de PayPal renderizado por JS -->
+        <div id="paypal-button-container" class="mt-2 min-h-[40px]"></div>
+      </div>
+
+      <div class="text-[10px] text-gray-600 text-center font-mono">
+        KAIROS Platform v3.0
       </div>
     </div>
   </div>
 
   <script>
+    let balance = 100.00;
+
     function setPair(symbol) {
       document.getElementById('tv_iframe').src = `https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(symbol)}&interval=D&theme=dark&style=1`;
-      document.getElementById('currentPairText').innerText = symbol.replace('BINANCE:', '').replace('USDT', ' / USDT');
     }
+
     function updateChart() {
       const val = document.getElementById('tokenInput').value.trim();
       if (val) setPair(val);
     }
 
-    // Inicializar botones de PayPal
+    function executeTrade(type) {
+      const amount = parseFloat(document.getElementById('tradeAmount').value);
+      const status = document.getElementById('tradeStatus');
+
+      if (isNaN(amount) || amount <= 0) {
+        status.className = "text-xs text-center font-mono text-rose-400";
+        status.innerText = "Ingresa un monto válido";
+        return;
+      }
+
+      if (amount > balance) {
+        status.className = "text-xs text-center font-mono text-rose-400";
+        status.innerText = "Saldo insuficiente. Recarga con PayPal.";
+        return;
+      }
+
+      balance -= amount;
+      document.getElementById('userBalance').innerText = `$${balance.toFixed(2)} USD`;
+      status.className = "text-xs text-center font-mono text-cyan-400";
+      status.innerText = `Procesando orden ${type}...`;
+
+      setTimeout(() => {
+        const win = Math.random() > 0.4;
+        if (win) {
+          const profit = amount * 1.85;
+          balance += profit;
+          status.className = "text-xs text-center font-mono text-emerald-400";
+          status.innerText = `¡Operación Ganada! +$${profit.toFixed(2)}`;
+        } else {
+          status.className = "text-xs text-center font-mono text-rose-400";
+          status.innerText = "Operación Finalizada sin Retorno.";
+        }
+        document.getElementById('userBalance').innerText = `$${balance.toFixed(2)} USD`;
+      }, 3000);
+    }
+
+    // Renderizar botones estándar de PayPal al cargar la página
     window.addEventListener('load', () => {
-      if (window.paypal && paypal.HostedButtons) {
-        paypal.HostedButtons({ hostedButtonId: "BAAMc7QRslo4vGuG9Irch" }).render("#paypal-container-top");
-        paypal.HostedButtons({ hostedButtonId: "BAAMc7QRslo4vGuG9Irch" }).render("#paypal-container-side");
+      if (window.paypal) {
+        paypal.Buttons({
+          createOrder: function(data, actions) {
+            const amount = document.getElementById('tradeAmount').value || "10.00";
+            return actions.order.create({
+              purchase_units: [{
+                amount: { value: amount }
+              }]
+            });
+          },
+          onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+              const paidAmount = parseFloat(details.purchase_units[0].amount.value);
+              balance += paidAmount;
+              document.getElementById('userBalance').innerText = `$${balance.toFixed(2)} USD`;
+              alert('Recarga exitosa de $' + paidAmount + ' USD realizada por ' + details.payer.name.given_name);
+            });
+          }
+        }).render('#paypal-button-container');
       }
     });
   </script>
